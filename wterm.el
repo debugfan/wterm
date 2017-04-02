@@ -1,4 +1,4 @@
-;;; wterm.el --- a windows console terminal mode package                     -*- lexical-binding: t; -*-
+;;; wterm.el --- a Windows console terminal mode package                     -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2014  Debugfan Chin
 

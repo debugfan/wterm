@@ -41,6 +41,43 @@
   :require 'wterm
   :group 'wterm)
 
+(defun wterm-send-return ()
+  (interactive)
+  (term-send-raw-string "\r\n"))
+
+(defun term-char-mode ()
+  "Switch to char (\"raw\") sub-mode of term mode.
+Each character you type is sent directly to the inferior without
+intervention from Emacs, except for the escape character (usually C-c)."
+  (interactive)
+  ;; FIXME: Emit message? Cfr ilisp-raw-message
+  (when (term-in-line-mode)
+    (setq term-old-mode-map (current-local-map))
+    (use-local-map term-raw-map)
+    (unless wterm-disable-flag (local-set-key (kbd "<return>") 'wterm-send-return))
+    (easy-menu-add term-terminal-menu)
+    (easy-menu-add term-signals-menu)
+
+    ;; Send existing partial line to inferior (without newline).
+    (let ((pmark (process-mark (get-buffer-process (current-buffer))))
+	  (save-input-sender term-input-sender))
+      (when (> (point) pmark)
+	(unwind-protect
+	    (progn
+	      (setq term-input-sender
+		    (symbol-function 'term-send-string))
+	      (end-of-line)
+	      (term-send-input))
+	  (setq term-input-sender save-input-sender))))
+    (term-update-mode-line)))  
+  
+(defun term-simple-send (proc string)
+  "Default function for sending to PROC input STRING.
+This just sends STRING plus a newline.  To override this,
+set the hook `term-input-sender'."
+  (term-send-string proc string)
+  (term-send-string proc (if wterm-disable-flag "\n" "\r\n")))
+
 ;; This auxiliary function cranks up the process for term-exec in
 ;; the appropriate environment.
 

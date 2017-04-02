@@ -113,18 +113,18 @@ set the hook `term-input-sender'."
 	;; do the decoding by hand on the parts that are made of chars.
 	(coding-system-for-read 'binary))
     (if wterm-disable-flag
-        ((apply 'start-process name buffer
+        (apply 'start-process name buffer
            "/bin/sh" "-c"
            (format "stty -nl echo rows %d columns %d sane 2>/dev/null;\
     if [ $1 = .. ]; then shift; fi; exec \"$@\""
                term-height term-width)
            ".."
-           command switches))
+           command switches)
          (apply 'start-process name buffer
            "cmd" "/c"
-           (format "mode %d,%d && "
-               term-width term-height)
-           command switches))))
+           (format "mode %d,%d && %s"
+               term-width term-height command)
+            switches))))
 
 ;;;###autoload
 (defun term (program)
